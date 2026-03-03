@@ -1,140 +1,160 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>コウペンちゃんデータベース（非公式）</title>
+<meta charset="UTF-8">
+<title>コウペンちゃんデータベース（非公式）</title>
 
-  <!-- フォント -->
-  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic&display=swap" rel="stylesheet">
+<script async src="https://platform.twitter.com/widgets.js"></script>
 
-  <!-- X埋め込み用スクリプト -->
-  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-  <style>
-    body {
-      font-family: 'Zen Maru Gothic', sans-serif;
-      background-color: #fdeef4;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-
-    header {
-      background-color: #ffcce5;
-      padding: 20px;
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    .disclaimer {
-      background-color: #fff0f8;
-      padding: 15px;
-      font-size: 14px;
-      color: #555;
-    }
-
-    .search-box {
-      margin: 30px;
-    }
-
-    input {
-      padding: 10px;
-      width: 250px;
-      border-radius: 20px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      padding: 10px 20px;
-      border-radius: 20px;
-      border: none;
-      background-color: #ff99cc;
-      color: white;
-      cursor: pointer;
-    }
-
-    .results {
-      margin: 20px;
-    }
-
-    footer {
-      margin-top: 40px;
-      padding: 20px;
-      font-size: 12px;
-      color: #777;
-    }
-  </style>
+<style>
+body{
+  font-family:'Zen Maru Gothic',sans-serif;
+  background:#fdeef4;
+  margin:0;
+  text-align:center;
+}
+header{
+  background:#ffcce5;
+  padding:20px;
+  font-size:24px;
+  font-weight:bold;
+}
+.disclaimer{
+  background:#fff0f8;
+  padding:15px;
+  font-size:14px;
+}
+.search-box{
+  margin:30px;
+}
+input{
+  padding:10px;
+  width:260px;
+  border-radius:20px;
+  border:1px solid #ccc;
+}
+button{
+  padding:10px 20px;
+  border-radius:20px;
+  border:none;
+  background:#ff99cc;
+  color:white;
+  cursor:pointer;
+}
+.card{
+  background:white;
+  margin:20px auto;
+  padding:15px;
+  width:90%;
+  max-width:550px;
+  border-radius:20px;
+  box-shadow:0 4px 8px rgba(0,0,0,0.1);
+}
+.tags{
+  margin-bottom:10px;
+  font-size:14px;
+  color:#888;
+}
+.date{
+  font-size:13px;
+  color:#666;
+  margin-bottom:10px;
+}
+</style>
 </head>
 
 <body>
 
-  <header>
-    コウペンちゃん データベース
-  </header>
+<header>
+コウペンちゃん データベース
+</header>
 
-  <div class="disclaimer">
-    本サイトはコウペンちゃんの非公式ファンサイトです。<br>
-    公式および作者様とは一切関係ありません。<br>
-    画像は保存せず、Xの埋め込み機能のみを使用しています。
-  </div>
+<div class="disclaimer">
+本サイトはコウペンちゃんの非公式ファンサイトです。<br>
+公式および作者様とは一切関係ありません。<br>
+画像は保存せず、Xの埋め込み機能のみを使用しています。
+</div>
 
-  <div class="search-box">
-    <input type="text" id="keyword" placeholder="キーワード検索（例：出勤 えらい）">
-    <button onclick="searchPosts()">検索</button>
-  </div>
+<div class="search-box">
+<input type="text" id="keyword" placeholder="タグ検索">
+<button onclick="searchPosts()">検索</button>
+</div>
 
-  <div class="results" id="results">
-    <!-- ここに投稿が表示されます -->
-  </div>
+<div id="results"></div>
 
-  <footer>
-    © Fan-made database site
-  </footer>
+<script>
 
-  <script>
-    // 仮データ（あとでJSONに分離可能）
-    const posts = [
-      {
-        url: "https://x.com/k_r_r_l_l_/status/849013724111265793",
-        tags: ["初投稿"]
-      },
-      {
-        url: "https://x.com/k_r_r_l_l_/status/2028725814729269699",
-        tags: ["最新"]
-      }
-    ];
+let posts = [];
 
-    function searchPosts() {
-      const keyword = document.getElementById("keyword").value;
-      const resultsDiv = document.getElementById("results");
-      resultsDiv.innerHTML = "";
+fetch("data/posts.json")
+.then(res => res.json())
+.then(data => {
+  posts = data;
+  displayPosts(posts);
+});
 
-      const filtered = posts.filter(post =>
-        post.tags.some(tag => tag.includes(keyword))
-      );
+function searchPosts(){
+  const keyword = document.getElementById("keyword").value;
+  const filtered = posts.filter(p =>
+    p.tags.some(tag => tag.includes(keyword))
+  );
+  displayPosts(filtered);
+}
 
-      if (filtered.length === 0) {
-        resultsDiv.innerHTML = "<p>該当する投稿がありません。</p>";
-        return;
-      }
+function displayPosts(list){
+  const container = document.getElementById("results");
+  container.innerHTML = "";
 
-      filtered.forEach(post => {
-        const blockquote = document.createElement("blockquote");
-        blockquote.className = "twitter-tweet";
+  list.forEach(post=>{
+    const card = document.createElement("div");
+    card.className = "card";
 
-        const link = document.createElement("a");
-        link.href = post.url;
+    const tags = document.createElement("div");
+    tags.className = "tags";
+    tags.textContent = "タグ: " + post.tags.join(", ");
 
-        blockquote.appendChild(link);
-        resultsDiv.appendChild(blockquote);
-      });
+    const date = document.createElement("div");
+    date.className = "date";
+    date.textContent = "投稿日: 読み込み中...";
 
-      if (window.twttr) {
-        window.twttr.widgets.load();
-      }
+    const blockquote = document.createElement("blockquote");
+    blockquote.className = "twitter-tweet";
+    const a = document.createElement("a");
+    a.href = post.url;
+    blockquote.appendChild(a);
+
+    card.appendChild(tags);
+    card.appendChild(date);
+    card.appendChild(blockquote);
+    container.appendChild(card);
+  });
+
+  if(window.twttr){
+    window.twttr.widgets.load().then(()=>{
+      autoExtractDates();
+    });
+  }
+}
+
+/* X埋め込みから日付を自動抽出 */
+function autoExtractDates(){
+  const cards = document.querySelectorAll(".card");
+
+  cards.forEach(card=>{
+    const timeElement = card.querySelector("time");
+    if(timeElement){
+      const dateText = new Date(timeElement.getAttribute("datetime"));
+      const formatted =
+        dateText.getFullYear() + "-" +
+        String(dateText.getMonth()+1).padStart(2,"0") + "-" +
+        String(dateText.getDate()).padStart(2,"0");
+      card.querySelector(".date").textContent = "投稿日: " + formatted;
     }
-  </script>
+  });
+}
+
+</script>
 
 </body>
 </html>
-
