@@ -45,14 +45,25 @@ button{
   background:white;
   margin:20px auto;
   padding:15px;
-  width:90%;
-  max-width:550px;
+  width:95%;
+  max-width:750px;
   border-radius:20px;
   box-shadow:0 4px 8px rgba(0,0,0,0.1);
   transition:0.2s;
+  display:flex;
+  gap:15px;
+  align-items:flex-start;
 }
 .card:hover{
   transform:scale(1.02);
+}
+.thumb{
+  width:260px;
+  flex-shrink:0;
+}
+.info{
+  flex:1;
+  text-align:left;
 }
 .tags{
   margin-bottom:10px;
@@ -75,6 +86,18 @@ button{
 }
 iframe{
   border-radius:15px !important;
+}
+@media(max-width:768px){
+  .card{
+    flex-direction:column;
+    align-items:center;
+  }
+  .thumb{
+    width:100%;
+  }
+  .info{
+    text-align:center;
+  }
 }
 </style>
 </head>
@@ -102,7 +125,6 @@ iframe{
 
 <script>
 
-/* 投稿日を明示的に保存 */
 const posts = [
   {
     url: "https://x.com/i/status/2027876844582920243",
@@ -151,6 +173,24 @@ function displayPosts(list){
       window.open(post.url, "_blank");
     };
 
+    /* 左：X埋め込み（サムネ風） */
+    const thumb = document.createElement("div");
+    thumb.className = "thumb";
+
+    const blockquote = document.createElement("blockquote");
+    blockquote.className = "twitter-tweet";
+    blockquote.setAttribute("data-width", "260");
+
+    const a = document.createElement("a");
+    a.href = post.url;
+
+    blockquote.appendChild(a);
+    thumb.appendChild(blockquote);
+
+    /* 右：情報 */
+    const info = document.createElement("div");
+    info.className = "info";
+
     const tagsDiv = document.createElement("div");
     tagsDiv.className = "tags";
 
@@ -170,15 +210,11 @@ function displayPosts(list){
     dateDiv.className = "date";
     dateDiv.textContent = "投稿日: " + post.date;
 
-    const blockquote = document.createElement("blockquote");
-    blockquote.className = "twitter-tweet";
-    const a = document.createElement("a");
-    a.href = post.url;
-    blockquote.appendChild(a);
+    info.appendChild(tagsDiv);
+    info.appendChild(dateDiv);
 
-    card.appendChild(tagsDiv);
-    card.appendChild(dateDiv);
-    card.appendChild(blockquote);
+    card.appendChild(thumb);
+    card.appendChild(info);
     container.appendChild(card);
   });
 
