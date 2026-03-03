@@ -5,7 +5,6 @@
 <title>コウペンちゃんデータベース（非公式）</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic&display=swap" rel="stylesheet">
-<script async src="https://platform.twitter.com/widgets.js"></script>
 
 <style>
 body{
@@ -50,6 +49,10 @@ button{
   max-width:550px;
   border-radius:20px;
   box-shadow:0 4px 8px rgba(0,0,0,0.1);
+  transition:0.2s;
+}
+.card:hover{
+  transform:scale(1.02);
 }
 .tags{
   margin-bottom:10px;
@@ -69,6 +72,9 @@ button{
   border-radius:15px;
   cursor:pointer;
   font-size:13px;
+}
+iframe{
+  border-radius:15px !important;
 }
 </style>
 </head>
@@ -92,24 +98,30 @@ button{
 
 <div id="results"></div>
 
+<script async src="https://platform.twitter.com/widgets.js"></script>
+
 <script>
 
-/* 投稿データ（JSON統合） */
+/* 投稿日を明示的に保存 */
 const posts = [
   {
     url: "https://x.com/i/status/2027876844582920243",
+    date: "2026-03-01",
     tags: ["花粉", "大変", "ものだなぁ"]
   },
   {
     url: "https://x.com/i/status/2028259385441726550",
+    date: "2026-03-01",
     tags: ["のんびり日和", "団子", "春"]
   },
   {
     url: "https://x.com/i/status/2028638048502866057",
+    date: "2026-03-02",
     tags: ["ひなあられ", "ひなーられ", "ひな祭り"]
   },
   {
     url: "https://x.com/i/status/2028725814729269699",
+    date: "2026-03-03",
     tags: ["シロフォン", "ハンドシンバル", "楽器", "はなまるライフ"]
   }
 ];
@@ -135,6 +147,9 @@ function displayPosts(list){
   list.forEach(post=>{
     const card = document.createElement("div");
     card.className = "card";
+    card.onclick = () => {
+      window.open(post.url, "_blank");
+    };
 
     const tagsDiv = document.createElement("div");
     tagsDiv.className = "tags";
@@ -143,7 +158,8 @@ function displayPosts(list){
       const tagBtn = document.createElement("span");
       tagBtn.className = "tag-button";
       tagBtn.textContent = tag;
-      tagBtn.onclick = () => {
+      tagBtn.onclick = (e) => {
+        e.stopPropagation();
         document.getElementById("keyword").value = tag;
         searchPosts();
       };
@@ -152,7 +168,7 @@ function displayPosts(list){
 
     const dateDiv = document.createElement("div");
     dateDiv.className = "date";
-    dateDiv.textContent = "投稿日: 読み込み中...";
+    dateDiv.textContent = "投稿日: " + post.date;
 
     const blockquote = document.createElement("blockquote");
     blockquote.className = "twitter-tweet";
@@ -167,27 +183,8 @@ function displayPosts(list){
   });
 
   if(window.twttr){
-    window.twttr.widgets.load().then(()=>{
-      autoExtractDates();
-    });
+    window.twttr.widgets.load();
   }
-}
-
-/* X埋め込みから投稿日を自動取得 */
-function autoExtractDates(){
-  const cards = document.querySelectorAll(".card");
-
-  cards.forEach(card=>{
-    const timeElement = card.querySelector("time");
-    if(timeElement){
-      const dateText = new Date(timeElement.getAttribute("datetime"));
-      const formatted =
-        dateText.getFullYear() + "-" +
-        String(dateText.getMonth()+1).padStart(2,"0") + "-" +
-        String(dateText.getDate()).padStart(2,"0");
-      card.querySelector(".date").textContent = "投稿日: " + formatted;
-    }
-  });
 }
 
 </script>
