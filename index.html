@@ -61,6 +61,15 @@ button{
   color:#666;
   margin-bottom:10px;
 }
+.tag-button{
+  display:inline-block;
+  margin:4px;
+  padding:5px 12px;
+  background:#ffe6f2;
+  border-radius:15px;
+  cursor:pointer;
+  font-size:13px;
+}
 </style>
 </head>
 
@@ -85,17 +94,34 @@ button{
 
 <script>
 
-let posts = [];
+/* 投稿データ（JSON統合） */
+const posts = [
+  {
+    url: "https://x.com/i/status/2027876844582920243",
+    tags: ["花粉", "大変", "ものだなぁ"]
+  },
+  {
+    url: "https://x.com/i/status/2028259385441726550",
+    tags: ["のんびり日和", "団子", "春"]
+  },
+  {
+    url: "https://x.com/i/status/2028638048502866057",
+    tags: ["ひなあられ", "ひなーられ", "ひな祭り"]
+  },
+  {
+    url: "https://x.com/i/status/2028725814729269699",
+    tags: ["シロフォン", "ハンドシンバル", "楽器", "はなまるライフ"]
+  }
+];
 
-fetch("data/posts.json")
-.then(res => res.json())
-.then(data => {
-  posts = data;
-  displayPosts(posts);
-});
+displayPosts(posts);
 
 function searchPosts(){
-  const keyword = document.getElementById("keyword").value;
+  const keyword = document.getElementById("keyword").value.trim();
+  if(!keyword){
+    displayPosts(posts);
+    return;
+  }
   const filtered = posts.filter(p =>
     p.tags.some(tag => tag.includes(keyword))
   );
@@ -110,13 +136,23 @@ function displayPosts(list){
     const card = document.createElement("div");
     card.className = "card";
 
-    const tags = document.createElement("div");
-    tags.className = "tags";
-    tags.textContent = "タグ: " + post.tags.join(", ");
+    const tagsDiv = document.createElement("div");
+    tagsDiv.className = "tags";
 
-    const date = document.createElement("div");
-    date.className = "date";
-    date.textContent = "投稿日: 読み込み中...";
+    post.tags.forEach(tag=>{
+      const tagBtn = document.createElement("span");
+      tagBtn.className = "tag-button";
+      tagBtn.textContent = tag;
+      tagBtn.onclick = () => {
+        document.getElementById("keyword").value = tag;
+        searchPosts();
+      };
+      tagsDiv.appendChild(tagBtn);
+    });
+
+    const dateDiv = document.createElement("div");
+    dateDiv.className = "date";
+    dateDiv.textContent = "投稿日: 読み込み中...";
 
     const blockquote = document.createElement("blockquote");
     blockquote.className = "twitter-tweet";
@@ -124,8 +160,8 @@ function displayPosts(list){
     a.href = post.url;
     blockquote.appendChild(a);
 
-    card.appendChild(tags);
-    card.appendChild(date);
+    card.appendChild(tagsDiv);
+    card.appendChild(dateDiv);
     card.appendChild(blockquote);
     container.appendChild(card);
   });
@@ -137,7 +173,7 @@ function displayPosts(list){
   }
 }
 
-/* X埋め込みから日付を自動抽出 */
+/* X埋め込みから投稿日を自動取得 */
 function autoExtractDates(){
   const cards = document.querySelectorAll(".card");
 
